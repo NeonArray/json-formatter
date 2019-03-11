@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>JSON Format Output</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+    <form action="#" id="jsonForm">
+        <label>Original JSON</label>
+        <textarea name="jsonInput" id="jsonInput" cols="30" rows="10"></textarea>
+
+        <label>Desired Model</label>
+        <textarea name="jsonOutput" id="jsonOutput" cols="30" rows="10"></textarea>
+
+        <button type="submit">Go</button>
+    </form>
+
+    <script>
+        const jQ = function (selector) {
+            return document.querySelector(selector);
+        }
+
+        jQ('#jsonForm').addEventListener('submit', function (event) {
+            event.preventDefault(event);
+
+            const json = jQ('#jsonInput').value;
+            const output = jQ('#jsonOutput').value;
+
+            try {
+                JSON.parse(json);
+            } catch (error) {
+                throw new Error("Invalid JSON");
+            }
+
+            try {
+                JSON.parse(output);
+            } catch (error) {
+                throw new Error("Invalid output JSON");
+            }
+
+            format(json, output);
+        });
+
+        function format(input, output) {
+            let finalObject = [];
+            input = JSON.parse(input);
+            output = JSON.parse(output);
+
+            while (input.length) {
+                const item = input.pop();
+                let newSchema = {};
+
+                Object.keys(output).forEach((property) => {
+                    const val = traverse(item, property);
+
+                    if (val) {
+                        newSchema[property] = val;
+                    }
+                });
+
+                finalObject.push(newSchema);
+            }
+
+            console.log(finalObject);
+        }
+
+        function traverse(toTraverse, findKey) {
+
+            if (typeof toTraverse === 'object') {
+                if (toTraverse.hasOwnProperty(findKey)) {
+                    return toTraverse[findKey];
+                }
+
+                let value;
+
+                Object.keys(toTraverse).forEach((childProperty) => {
+                    value = traverse(toTraverse[childProperty], findKey);
+                });
+
+                if (value === undefined) {
+                    return;
+                }
+
+                return value;
+            }
+        }
+    </script>
+</body>
+
+</html>
